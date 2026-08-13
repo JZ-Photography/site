@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gallery &mdash; JZ Photography</title>
+<style>
+
+@import url('https://fonts.googleapis.com/css2?family=Castoro+Titling&family=Montserrat:wght@300;400;500;600&display=swap');
+
+:root {
+  --bg: #0a0a0a;
+  --ink: #fff;
+  --ink-dim: rgba(255,255,255,0.72);
+  --line: rgba(255,255,255,0.14);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 300;
+}
+.display { font-family: 'Castoro Titling', serif; font-weight: 400; }
+
+/* nav */
+header.site-nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 26px 42px;
+  background: linear-gradient(180deg, rgba(0,0,0,0.55), transparent);
+}
+header.site-nav .wordmark {
+  font-family: 'Castoro Titling', serif;
+  font-size: 20px;
+  letter-spacing: 0.04em;
+  color: var(--ink);
+  text-decoration: none;
+}
+header.site-nav nav { display: flex; gap: 30px; }
+header.site-nav nav a {
+  color: var(--ink);
+  text-decoration: none;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  opacity: 0.85;
+  transition: opacity 0.2s;
+}
+header.site-nav nav a:hover, header.site-nav nav a.active { opacity: 1; border-bottom: 1px solid var(--ink); padding-bottom: 4px; }
+@media (max-width: 700px) {
+  header.site-nav { padding: 18px 20px; }
+  header.site-nav nav { gap: 16px; }
+  header.site-nav nav a { font-size: 9px; letter-spacing: 0.1em; }
+}
+
+footer.site-footer {
+  text-align: center;
+  padding: 70px 24px 50px;
+  border-top: 1px solid var(--line);
+  color: var(--ink-dim);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+}
+footer.site-footer .wordmark { font-family: 'Castoro Titling', serif; font-size: 18px; color: var(--ink); margin-bottom: 10px; letter-spacing: 0.04em; }
+footer.site-footer a { color: var(--ink-dim); text-decoration: none; }
+footer.site-footer a:hover { color: var(--ink); }
+
+
+.gallery-header {
+  padding: 150px 24px 40px;
+  text-align: center;
+}
+.gallery-header h1 {
+  font-size: clamp(34px, 5vw, 56px);
+  letter-spacing: 0.02em;
+}
+.filters {
+  display: flex; flex-wrap: wrap; gap: 10px 26px; justify-content: center;
+  padding: 0 24px 50px;
+}
+.filter-btn {
+  background: none; border: none; color: var(--ink-dim);
+  font-family: 'Montserrat', sans-serif;
+  font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
+  cursor: pointer; padding-bottom: 6px; border-bottom: 1px solid transparent;
+  transition: color 0.2s, border-color 0.2s;
+}
+.filter-btn:hover { color: var(--ink); }
+.filter-btn.active { color: var(--ink); border-color: var(--ink); }
+
+main { max-width: 1500px; margin: 0 auto; padding: 0 24px 40px; }
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 4px;
+}
+.card {
+  position: relative; overflow: hidden; cursor: pointer;
+  aspect-ratio: 4/3; background: #111;
+}
+.card.hidden { display: none; }
+.card img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.5s ease; }
+.card:hover img { transform: scale(1.06); }
+.card figcaption {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  padding: 30px 14px 12px; font-size: 12px; letter-spacing: 0.03em;
+  background: linear-gradient(180deg, transparent, rgba(0,0,0,0.85));
+  opacity: 0; transform: translateY(6px);
+  transition: opacity 0.25s, transform 0.25s;
+}
+.card:hover figcaption { opacity: 1; transform: translateY(0); }
+
+#lightbox {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.95);
+  display: none; align-items: center; justify-content: center;
+  z-index: 300; flex-direction: column; padding: 40px;
+}
+#lightbox.open { display: flex; }
+#lightbox img { max-width: 92vw; max-height: 80vh; object-fit: contain; }
+#lightbox .caption { margin-top: 18px; color: var(--ink-dim); font-size: 13px; letter-spacing: 0.05em; }
+#lightbox .close {
+  position: absolute; top: 24px; right: 32px; font-size: 32px; color: var(--ink);
+  cursor: pointer; background: none; border: none; line-height: 1;
+}
+</style>
+</head>
+<body>
+
+<header class="site-nav">
+  <a class="wordmark" href="index.html">JZ Photography</a>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="gallery.html" class="active">Gallery</a>
+    <a href="https://jeremy-zimmer.pixels.com/" target="_blank" rel="noopener">Prints</a>
+  </nav>
+</header>
+
+<div class="gallery-header">
+  <h1 class="display">Gallery</h1>
+</div>
+
+<div class="filters">
+  <button class="filter-btn active" data-filter="all">All</button><button class="filter-btn" data-filter="wildlife">Wildlife</button><button class="filter-btn" data-filter="birds">Birds</button><button class="filter-btn" data-filter="landscapes">Landscapes</button><button class="filter-btn" data-filter="coastal">Coastal</button><button class="filter-btn" data-filter="details">Details</button>
+</div>
+
+<main>
+  <div class="grid" id="grid">
+    
+      <figure class="card" data-cat="wildlife" onclick="openLightbox('images/young-bison-in-natural-habitat-jz-photography.jpg','Young Bison in Natural Habitat')">
+        <img src="images/young-bison-in-natural-habitat-jz-photography.jpg" alt="Young Bison in Natural Habitat" loading="lazy">
+        <figcaption>Young Bison in Natural Habitat</figcaption>
+      </figure>
+      <figure class="card" data-cat="wildlife" onclick="openLightbox('images/bison-grazing-in-the-wild-jz-photography.jpg','Bison Grazing in the Wild')">
+        <img src="images/bison-grazing-in-the-wild-jz-photography.jpg" alt="Bison Grazing in the Wild" loading="lazy">
+        <figcaption>Bison Grazing in the Wild</figcaption>
+      </figure>
+      <figure class="card" data-cat="wildlife" onclick="openLightbox('images/majestic-elk-in-natural-habitat-jz-photography.jpg','Majestic Elk in Natural Habitat')">
+        <img src="images/majestic-elk-in-natural-habitat-jz-photography.jpg" alt="Majestic Elk in Natural Habitat" loading="lazy">
+        <figcaption>Majestic Elk in Natural Habitat</figcaption>
+      </figure>
+      <figure class="card" data-cat="wildlife" onclick="openLightbox('images/mountain-goat-with-shedding-coat-jz-photography.jpg','Mountain Goat with Shedding Coat')">
+        <img src="images/mountain-goat-with-shedding-coat-jz-photography.jpg" alt="Mountain Goat with Shedding Coat" loading="lazy">
+        <figcaption>Mountain Goat with Shedding Coat</figcaption>
+      </figure>
+      <figure class="card" data-cat="wildlife" onclick="openLightbox('images/mountain-goat-on-rocky-ledge-jz-photography.jpg','Mountain Goat on Rocky Ledge')">
+        <img src="images/mountain-goat-on-rocky-ledge-jz-photography.jpg" alt="Mountain Goat on Rocky Ledge" loading="lazy">
+        <figcaption>Mountain Goat on Rocky Ledge</figcaption>
+      </figure>
+      <figure class="card" data-cat="wildlife" onclick="openLightbox('images/majestic-bear-in-shadow-jz-photography.jpg','Majestic Bear in Shadow')">
+        <img src="images/majestic-bear-in-shadow-jz-photography.jpg" alt="Majestic Bear in Shadow" loading="lazy">
+        <figcaption>Majestic Bear in Shadow</figcaption>
+      </figure>
+      <figure class="card" data-cat="wildlife" onclick="openLightbox('images/black-bear-in-grassy-meadow-jz-photography.jpg','Black Bear in Grassy Meadow')">
+        <img src="images/black-bear-in-grassy-meadow-jz-photography.jpg" alt="Black Bear in Grassy Meadow" loading="lazy">
+        <figcaption>Black Bear in Grassy Meadow</figcaption>
+      </figure>
+      <figure class="card" data-cat="wildlife" onclick="openLightbox('images/majestic-deer-in-lush-forest-jz-photography.jpg','Majestic Deer in Lush Forest')">
+        <img src="images/majestic-deer-in-lush-forest-jz-photography.jpg" alt="Majestic Deer in Lush Forest" loading="lazy">
+        <figcaption>Majestic Deer in Lush Forest</figcaption>
+      </figure>
+      <figure class="card" data-cat="wildlife" onclick="openLightbox('images/portrait-of-a-young-deer-jz-photography.jpg','Portrait of a Young Deer')">
+        <img src="images/portrait-of-a-young-deer-jz-photography.jpg" alt="Portrait of a Young Deer" loading="lazy">
+        <figcaption>Portrait of a Young Deer</figcaption>
+      </figure>
+      <figure class="card" data-cat="wildlife" onclick="openLightbox('images/majestic-moose-in-snowy-field-jz-photography.jpg','Majestic Moose in Snowy Field')">
+        <img src="images/majestic-moose-in-snowy-field-jz-photography.jpg" alt="Majestic Moose in Snowy Field" loading="lazy">
+        <figcaption>Majestic Moose in Snowy Field</figcaption>
+      </figure>
+      <figure class="card" data-cat="wildlife" onclick="openLightbox('images/moose-swimming-in-pond-jz-photography.jpg','Moose Swimming in Pond')">
+        <img src="images/moose-swimming-in-pond-jz-photography.jpg" alt="Moose Swimming in Pond" loading="lazy">
+        <figcaption>Moose Swimming in Pond</figcaption>
+      </figure>
+      <figure class="card" data-cat="wildlife" onclick="openLightbox('images/vibrant-fox-in-snow-jz-photography.jpg','Vibrant Fox in Snow')">
+        <img src="images/vibrant-fox-in-snow-jz-photography.jpg" alt="Vibrant Fox in Snow" loading="lazy">
+        <figcaption>Vibrant Fox in Snow</figcaption>
+      </figure>
+      <figure class="card" data-cat="wildlife" onclick="openLightbox('images/majestic-red-fox-in-profile-jz-photography.jpg','Majestic Red Fox in Profile')">
+        <img src="images/majestic-red-fox-in-profile-jz-photography.jpg" alt="Majestic Red Fox in Profile" loading="lazy">
+        <figcaption>Majestic Red Fox in Profile</figcaption>
+      </figure>
+      <figure class="card" data-cat="wildlife" onclick="openLightbox('images/limpy-the-coyote-in-snowy-landscape-jz-photography.jpg','Limpy the Coyote in Snowy Landscape')">
+        <img src="images/limpy-the-coyote-in-snowy-landscape-jz-photography.jpg" alt="Limpy the Coyote in Snowy Landscape" loading="lazy">
+        <figcaption>Limpy the Coyote in Snowy Landscape</figcaption>
+      </figure>
+      <figure class="card" data-cat="wildlife" onclick="openLightbox('images/silhouette-of-a-lone-coyote-at-dusk-jz-photography.jpg','Silhouette of a Lone Coyote at Dusk')">
+        <img src="images/silhouette-of-a-lone-coyote-at-dusk-jz-photography.jpg" alt="Silhouette of a Lone Coyote at Dusk" loading="lazy">
+        <figcaption>Silhouette of a Lone Coyote at Dusk</figcaption>
+      </figure>
+      <figure class="card" data-cat="wildlife" onclick="openLightbox('images/badger-in-snowy-landscape-jz-photography.jpg','Badger in Snowy Landscape')">
+        <img src="images/badger-in-snowy-landscape-jz-photography.jpg" alt="Badger in Snowy Landscape" loading="lazy">
+        <figcaption>Badger in Snowy Landscape</figcaption>
+      </figure>
+      <figure class="card" data-cat="wildlife" onclick="openLightbox('images/majestic-bighorn-sheep-grazing-jz-photography.jpg','Majestic Bighorn Sheep Grazing')">
+        <img src="images/majestic-bighorn-sheep-grazing-jz-photography.jpg" alt="Majestic Bighorn Sheep Grazing" loading="lazy">
+        <figcaption>Majestic Bighorn Sheep Grazing</figcaption>
+      </figure>
+      <figure class="card" data-cat="wildlife" onclick="openLightbox('images/bighorn-sheep-battling-on-open-field-jz-photography.jpg','Bighorn Sheep Battling on Open Field')">
+        <img src="images/bighorn-sheep-battling-on-open-field-jz-photography.jpg" alt="Bighorn Sheep Battling on Open Field" loading="lazy">
+        <figcaption>Bighorn Sheep Battling on Open Field</figcaption>
+      </figure>
+      <figure class="card" data-cat="wildlife" onclick="openLightbox('images/marmot-standing-alert-on-rock-jz-photography.jpg','Marmot Standing Alert on Rock')">
+        <img src="images/marmot-standing-alert-on-rock-jz-photography.jpg" alt="Marmot Standing Alert on Rock" loading="lazy">
+        <figcaption>Marmot Standing Alert on Rock</figcaption>
+      </figure>
+      <figure class="card" data-cat="wildlife" onclick="openLightbox('images/curious-ground-squirrel-jz-photography.jpg','Curious Ground Squirrel')">
+        <img src="images/curious-ground-squirrel-jz-photography.jpg" alt="Curious Ground Squirrel" loading="lazy">
+        <figcaption>Curious Ground Squirrel</figcaption>
+      </figure>
+      <figure class="card" data-cat="wildlife" onclick="openLightbox('images/ground-squirrel-in-meadow-jz-photography.jpg','Ground Squirrel in Meadow')">
+        <img src="images/ground-squirrel-in-meadow-jz-photography.jpg" alt="Ground Squirrel in Meadow" loading="lazy">
+        <figcaption>Ground Squirrel in Meadow</figcaption>
+      </figure>
+      <figure class="card" data-cat="wildlife" onclick="openLightbox('images/chipmunk-jz-photography.jpg','Chipmunk')">
+        <img src="images/chipmunk-jz-photography.jpg" alt="Chipmunk" loading="lazy">
+        <figcaption>Chipmunk</figcaption>
+      </figure>
+      <figure class="card" data-cat="wildlife" onclick="openLightbox('images/evening-snack-jz-photography.jpg','Evening Snack')">
+        <img src="images/evening-snack-jz-photography.jpg" alt="Evening Snack" loading="lazy">
+        <figcaption>Evening Snack</figcaption>
+      </figure>
+      <figure class="card" data-cat="wildlife" onclick="openLightbox('images/standing-watch-jz-photography.jpg','Standing Watch')">
+        <img src="images/standing-watch-jz-photography.jpg" alt="Standing Watch" loading="lazy">
+        <figcaption>Standing Watch</figcaption>
+      </figure>
+      <figure class="card" data-cat="wildlife" onclick="openLightbox('images/raccoon-jz-photography.jpg','Raccoon')">
+        <img src="images/raccoon-jz-photography.jpg" alt="Raccoon" loading="lazy">
+        <figcaption>Raccoon</figcaption>
+      </figure>
+      <figure class="card" data-cat="wildlife" onclick="openLightbox('images/otter-grooming-its-paws-jz-photography.jpg','Otter Grooming Its Paws')">
+        <img src="images/otter-grooming-its-paws-jz-photography.jpg" alt="Otter Grooming Its Paws" loading="lazy">
+        <figcaption>Otter Grooming Its Paws</figcaption>
+      </figure>
+      <figure class="card" data-cat="wildlife" onclick="openLightbox('images/laughing-sea-otter-jz-photography.jpg','Laughing Sea Otter')">
+        <img src="images/laughing-sea-otter-jz-photography.jpg" alt="Laughing Sea Otter" loading="lazy">
+        <figcaption>Laughing Sea Otter</figcaption>
+      </figure>
+      <figure class="card" data-cat="wildlife" onclick="openLightbox('images/relaxed-seal-on-rocky-shore-jz-photography.jpg','Relaxed Seal on Rocky Shore')">
+        <img src="images/relaxed-seal-on-rocky-shore-jz-photography.jpg" alt="Relaxed Seal on Rocky Shore" loading="lazy">
+        <figcaption>Relaxed Seal on Rocky Shore</figcaption>
+      </figure>
+      <figure class="card" data-cat="wildlife" onclick="openLightbox('images/kangaroo-relaxing-by-bamboo-fence-jz-photography.jpg','Kangaroo Relaxing by Bamboo Fence')">
+        <img src="images/kangaroo-relaxing-by-bamboo-fence-jz-photography.jpg" alt="Kangaroo Relaxing by Bamboo Fence" loading="lazy">
+        <figcaption>Kangaroo Relaxing by Bamboo Fence</figcaption>
+      </figure>
+      <figure class="card" data-cat="wildlife" onclick="openLightbox('images/baboon-in-warm-light-jz-photography.jpg','Baboon in Warm Light')">
+        <img src="images/baboon-in-warm-light-jz-photography.jpg" alt="Baboon in Warm Light" loading="lazy">
+        <figcaption>Baboon in Warm Light</figcaption>
+      </figure>
+      <figure class="card" data-cat="wildlife" onclick="openLightbox('images/contemplative-baboon-in-sunlight-jz-photography.jpg','Contemplative Baboon in Sunlight')">
+        <img src="images/contemplative-baboon-in-sunlight-jz-photography.jpg" alt="Contemplative Baboon in Sunlight" loading="lazy">
+        <figcaption>Contemplative Baboon in Sunlight</figcaption>
+      </figure>
+      <figure class="card" data-cat="wildlife" onclick="openLightbox('images/lemur-with-bright-orange-eyes-jz-photography.jpg','Lemur with Bright Orange Eyes')">
+        <img src="images/lemur-with-bright-orange-eyes-jz-photography.jpg" alt="Lemur with Bright Orange Eyes" loading="lazy">
+        <figcaption>Lemur with Bright Orange Eyes</figcaption>
+      </figure>
+      <figure class="card" data-cat="wildlife" onclick="openLightbox('images/resting-lemur-with-intense-eyes-jz-photography.jpg','Resting Lemur with Intense Eyes')">
+        <img src="images/resting-lemur-with-intense-eyes-jz-photography.jpg" alt="Resting Lemur with Intense Eyes" loading="lazy">
+        <figcaption>Resting Lemur with Intense Eyes</figcaption>
+      </figure>
+      <figure class="card" data-cat="wildlife" onclick="openLightbox('images/majestic-lion-in-shadow-jz-photography.jpg','Majestic Lion in Shadow')">
+        <img src="images/majestic-lion-in-shadow-jz-photography.jpg" alt="Majestic Lion in Shadow" loading="lazy">
+        <figcaption>Majestic Lion in Shadow</figcaption>
+      </figure>
+      <figure class="card" data-cat="wildlife" onclick="openLightbox('images/majestic-lion-in-shadowed-jungle-jz-photography.jpg','Majestic Lion in Shadowed Jungle')">
+        <img src="images/majestic-lion-in-shadowed-jungle-jz-photography.jpg" alt="Majestic Lion in Shadowed Jungle" loading="lazy">
+        <figcaption>Majestic Lion in Shadowed Jungle</figcaption>
+      </figure>
+      <figure class="card" data-cat="wildlife" onclick="openLightbox('images/majestic-leopard-in-shadow-jz-photography.jpg','Majestic Leopard in Shadow')">
+        <img src="images/majestic-leopard-in-shadow-jz-photography.jpg" alt="Majestic Leopard in Shadow" loading="lazy">
+        <figcaption>Majestic Leopard in Shadow</figcaption>
+      </figure>
+      <figure class="card" data-cat="wildlife" onclick="openLightbox('images/majestic-leopard-in-monochrome-jz-photography.jpg','Majestic Leopard in Monochrome')">
+        <img src="images/majestic-leopard-in-monochrome-jz-photography.jpg" alt="Majestic Leopard in Monochrome" loading="lazy">
+        <figcaption>Majestic Leopard in Monochrome</figcaption>
+      </figure>
+      <figure class="card" data-cat="wildlife" onclick="openLightbox('images/majestic-tiger-in-the-shadows-jz-photography.jpg','Majestic Tiger in the Shadows')">
+        <img src="images/majestic-tiger-in-the-shadows-jz-photography.jpg" alt="Majestic Tiger in the Shadows" loading="lazy">
+        <figcaption>Majestic Tiger in the Shadows</figcaption>
+      </figure>
+      <figure class="card" data-cat="wildlife" onclick="openLightbox('images/majestic-tiger-in-sunlight-jz-photography.jpg','Majestic Tiger in Sunlight')">
+        <img src="images/majestic-tiger-in-sunlight-jz-photography.jpg" alt="Majestic Tiger in Sunlight" loading="lazy">
+        <figcaption>Majestic Tiger in Sunlight</figcaption>
+      </figure>
+      <figure class="card" data-cat="wildlife" onclick="openLightbox('images/zebras-galloping-in-open-field-jz-photography.jpg','Zebras Galloping in Open Field')">
+        <img src="images/zebras-galloping-in-open-field-jz-photography.jpg" alt="Zebras Galloping in Open Field" loading="lazy">
+        <figcaption>Zebras Galloping in Open Field</figcaption>
+      </figure>
+      <figure class="card" data-cat="wildlife" onclick="openLightbox('images/three-zebras-in-a-field-jz-photography.jpg','Three Zebras in a Field')">
+        <img src="images/three-zebras-in-a-field-jz-photography.jpg" alt="Three Zebras in a Field" loading="lazy">
+        <figcaption>Three Zebras in a Field</figcaption>
+      </figure>
+      <figure class="card" data-cat="wildlife" onclick="openLightbox('images/cheetah-jz-photography.jpg','Cheetah')">
+        <img src="images/cheetah-jz-photography.jpg" alt="Cheetah" loading="lazy">
+        <figcaption>Cheetah</figcaption>
+      </figure>
+      <figure class="card" data-cat="birds" onclick="openLightbox('images/majestic-eagle-on-a-branch-jz-photography.jpg','Majestic Eagle on a Branch')">
+        <img src="images/majestic-eagle-on-a-branch-jz-photography.jpg" alt="Majestic Eagle on a Branch" loading="lazy">
+        <figcaption>Majestic Eagle on a Branch</figcaption>
+      </figure>
+      <figure class="card" data-cat="birds" onclick="openLightbox('images/majestic-eagle-on-a-rocky-outcrop-jz-photography.jpg','Majestic Eagle on a Rocky Outcrop')">
+        <img src="images/majestic-eagle-on-a-rocky-outcrop-jz-photography.jpg" alt="Majestic Eagle on a Rocky Outcrop" loading="lazy">
+        <figcaption>Majestic Eagle on a Rocky Outcrop</figcaption>
+      </figure>
+      <figure class="card" data-cat="birds" onclick="openLightbox('images/great-horned-owls-jz-photography.jpg','Great Horned Owls')">
+        <img src="images/great-horned-owls-jz-photography.jpg" alt="Great Horned Owls" loading="lazy">
+        <figcaption>Great Horned Owls</figcaption>
+      </figure>
+      <figure class="card" data-cat="birds" onclick="openLightbox('images/owl-with-glowing-eyes-at-night-jz-photography.jpg','Owl with Glowing Eyes at Night')">
+        <img src="images/owl-with-glowing-eyes-at-night-jz-photography.jpg" alt="Owl with Glowing Eyes at Night" loading="lazy">
+        <figcaption>Owl with Glowing Eyes at Night</figcaption>
+      </figure>
+      <figure class="card" data-cat="birds" onclick="openLightbox('images/osprey-jz-photography.jpg','Osprey')">
+        <img src="images/osprey-jz-photography.jpg" alt="Osprey" loading="lazy">
+        <figcaption>Osprey</figcaption>
+      </figure>
+      <figure class="card" data-cat="birds" onclick="openLightbox('images/mountain-bluebird-jz-photography.jpg','Mountain Bluebird')">
+        <img src="images/mountain-bluebird-jz-photography.jpg" alt="Mountain Bluebird" loading="lazy">
+        <figcaption>Mountain Bluebird</figcaption>
+      </figure>
+      <figure class="card" data-cat="birds" onclick="openLightbox('images/bluebird-on-autumn-branch-jz-photography.jpg','Bluebird on Autumn Branch')">
+        <img src="images/bluebird-on-autumn-branch-jz-photography.jpg" alt="Bluebird on Autumn Branch" loading="lazy">
+        <figcaption>Bluebird on Autumn Branch</figcaption>
+      </figure>
+      <figure class="card" data-cat="birds" onclick="openLightbox('images/lazuli-bunting-perched-on-a-tree-jz-photography.jpg','Lazuli Bunting Perched on a Tree')">
+        <img src="images/lazuli-bunting-perched-on-a-tree-jz-photography.jpg" alt="Lazuli Bunting Perched on a Tree" loading="lazy">
+        <figcaption>Lazuli Bunting Perched on a Tree</figcaption>
+      </figure>
+      <figure class="card" data-cat="birds" onclick="openLightbox('images/colorful-bird-perched-in-pine-tree-jz-photography.jpg','Colorful Bird Perched in Pine Tree')">
+        <img src="images/colorful-bird-perched-in-pine-tree-jz-photography.jpg" alt="Colorful Bird Perched in Pine Tree" loading="lazy">
+        <figcaption>Colorful Bird Perched in Pine Tree</figcaption>
+      </figure>
+      <figure class="card" data-cat="birds" onclick="openLightbox('images/colorful-bird-on-forest-branch-jz-photography.jpg','Colorful Bird on Forest Branch')">
+        <img src="images/colorful-bird-on-forest-branch-jz-photography.jpg" alt="Colorful Bird on Forest Branch" loading="lazy">
+        <figcaption>Colorful Bird on Forest Branch</figcaption>
+      </figure>
+      <figure class="card" data-cat="birds" onclick="openLightbox('images/colorful-puffin-swimming-jz-photography.jpg','Colorful Puffin Swimming')">
+        <img src="images/colorful-puffin-swimming-jz-photography.jpg" alt="Colorful Puffin Swimming" loading="lazy">
+        <figcaption>Colorful Puffin Swimming</figcaption>
+      </figure>
+      <figure class="card" data-cat="birds" onclick="openLightbox('images/resting-puffin-on-rocky-surface-jz-photography.jpg','Resting Puffin on Rocky Surface')">
+        <img src="images/resting-puffin-on-rocky-surface-jz-photography.jpg" alt="Resting Puffin on Rocky Surface" loading="lazy">
+        <figcaption>Resting Puffin on Rocky Surface</figcaption>
+      </figure>
+      <figure class="card" data-cat="birds" onclick="openLightbox('images/reflective-flamingo-in-a-dark-pond-jz-photography.jpg','Reflective Flamingo in a Dark Pond')">
+        <img src="images/reflective-flamingo-in-a-dark-pond-jz-photography.jpg" alt="Reflective Flamingo in a Dark Pond" loading="lazy">
+        <figcaption>Reflective Flamingo in a Dark Pond</figcaption>
+      </figure>
+      <figure class="card" data-cat="birds" onclick="openLightbox('images/flamingo-drinking-at-dusk-jz-photography.jpg','Flamingo Drinking at Dusk')">
+        <img src="images/flamingo-drinking-at-dusk-jz-photography.jpg" alt="Flamingo Drinking at Dusk" loading="lazy">
+        <figcaption>Flamingo Drinking at Dusk</figcaption>
+      </figure>
+      <figure class="card" data-cat="landscapes" onclick="openLightbox('images/snow-capped-mountain-peak-jz-photography.jpg','Snow-Capped Mountain Peak')">
+        <img src="images/snow-capped-mountain-peak-jz-photography.jpg" alt="Snow-Capped Mountain Peak" loading="lazy">
+        <figcaption>Snow-Capped Mountain Peak</figcaption>
+      </figure>
+      <figure class="card" data-cat="landscapes" onclick="openLightbox('images/serene-mountain-landscape-with-clouds-jz-photography.jpg','Serene Mountain Landscape with Clouds')">
+        <img src="images/serene-mountain-landscape-with-clouds-jz-photography.jpg" alt="Serene Mountain Landscape with Clouds" loading="lazy">
+        <figcaption>Serene Mountain Landscape with Clouds</figcaption>
+      </figure>
+      <figure class="card" data-cat="landscapes" onclick="openLightbox('images/majestic-mountain-landscape-jz-photography.jpg','Majestic Mountain Landscape')">
+        <img src="images/majestic-mountain-landscape-jz-photography.jpg" alt="Majestic Mountain Landscape" loading="lazy">
+        <figcaption>Majestic Mountain Landscape</figcaption>
+      </figure>
+      <figure class="card" data-cat="landscapes" onclick="openLightbox('images/steaming-mammoth-hot-spring-terraces-jz-photography.jpg','Steaming Mammoth Hot Spring Terraces')">
+        <img src="images/steaming-mammoth-hot-spring-terraces-jz-photography.jpg" alt="Steaming Mammoth Hot Spring Terraces" loading="lazy">
+        <figcaption>Steaming Mammoth Hot Spring Terraces</figcaption>
+      </figure>
+      <figure class="card" data-cat="landscapes" onclick="openLightbox('images/colorful-yellowstone-geothermal-hot-spring-jz-photography.jpg','Colorful Yellowstone Geothermal Hot Spring')">
+        <img src="images/colorful-yellowstone-geothermal-hot-spring-jz-photography.jpg" alt="Colorful Yellowstone Geothermal Hot Spring" loading="lazy">
+        <figcaption>Colorful Yellowstone Geothermal Hot Spring</figcaption>
+      </figure>
+      <figure class="card" data-cat="landscapes" onclick="openLightbox('images/winter-sunrise-at-soda-butte-in-yellowstone-jz-photography.jpg','Winter Sunrise at Soda Butte in Yellowstone')">
+        <img src="images/winter-sunrise-at-soda-butte-in-yellowstone-jz-photography.jpg" alt="Winter Sunrise at Soda Butte in Yellowstone" loading="lazy">
+        <figcaption>Winter Sunrise at Soda Butte in Yellowstone</figcaption>
+      </figure>
+      <figure class="card" data-cat="landscapes" onclick="openLightbox('images/roosevelt-arch-in-yellowstone-jz-photography.jpg','Roosevelt Arch in Yellowstone')">
+        <img src="images/roosevelt-arch-in-yellowstone-jz-photography.jpg" alt="Roosevelt Arch in Yellowstone" loading="lazy">
+        <figcaption>Roosevelt Arch in Yellowstone</figcaption>
+      </figure>
+      <figure class="card" data-cat="landscapes" onclick="openLightbox('images/mount-hood-jz-photography.jpg','Mount Hood')">
+        <img src="images/mount-hood-jz-photography.jpg" alt="Mount Hood" loading="lazy">
+        <figcaption>Mount Hood</figcaption>
+      </figure>
+      <figure class="card" data-cat="landscapes" onclick="openLightbox('images/tetons-jz-photography.jpg','Tetons')">
+        <img src="images/tetons-jz-photography.jpg" alt="Tetons" loading="lazy">
+        <figcaption>Tetons</figcaption>
+      </figure>
+      <figure class="card" data-cat="landscapes" onclick="openLightbox('images/serene-cascading-waterfall-jz-photography.jpg','Serene Cascading Waterfall')">
+        <img src="images/serene-cascading-waterfall-jz-photography.jpg" alt="Serene Cascading Waterfall" loading="lazy">
+        <figcaption>Serene Cascading Waterfall</figcaption>
+      </figure>
+      <figure class="card" data-cat="landscapes" onclick="openLightbox('images/mystical-forest-waterfall-jz-photography.jpg','Mystical Forest Waterfall')">
+        <img src="images/mystical-forest-waterfall-jz-photography.jpg" alt="Mystical Forest Waterfall" loading="lazy">
+        <figcaption>Mystical Forest Waterfall</figcaption>
+      </figure>
+      <figure class="card" data-cat="landscapes" onclick="openLightbox('images/majestic-autumn-waterfall-jz-photography.jpg','Majestic Autumn Waterfall')">
+        <img src="images/majestic-autumn-waterfall-jz-photography.jpg" alt="Majestic Autumn Waterfall" loading="lazy">
+        <figcaption>Majestic Autumn Waterfall</figcaption>
+      </figure>
+      <figure class="card" data-cat="landscapes" onclick="openLightbox('images/view-upward-in-a-dense-forest-jz-photography.jpg','View Upward in a Dense Forest')">
+        <img src="images/view-upward-in-a-dense-forest-jz-photography.jpg" alt="View Upward in a Dense Forest" loading="lazy">
+        <figcaption>View Upward in a Dense Forest</figcaption>
+      </figure>
+      <figure class="card" data-cat="landscapes" onclick="openLightbox('images/serene-birch-forest-scene-jz-photography.jpg','Serene Birch Forest Scene')">
+        <img src="images/serene-birch-forest-scene-jz-photography.jpg" alt="Serene Birch Forest Scene" loading="lazy">
+        <figcaption>Serene Birch Forest Scene</figcaption>
+      </figure>
+      <figure class="card" data-cat="landscapes" onclick="openLightbox('images/enchanted-forest-path-in-autumn-jz-photography.jpg','Enchanted Forest Path in Autumn')">
+        <img src="images/enchanted-forest-path-in-autumn-jz-photography.jpg" alt="Enchanted Forest Path in Autumn" loading="lazy">
+        <figcaption>Enchanted Forest Path in Autumn</figcaption>
+      </figure>
+      <figure class="card" data-cat="landscapes" onclick="openLightbox('images/breathtaking-canyon-at-sunset-jz-photography.jpg','Breathtaking Canyon at Sunset')">
+        <img src="images/breathtaking-canyon-at-sunset-jz-photography.jpg" alt="Breathtaking Canyon at Sunset" loading="lazy">
+        <figcaption>Breathtaking Canyon at Sunset</figcaption>
+      </figure>
+      <figure class="card" data-cat="coastal" onclick="openLightbox('images/lone-tree-on-coastal-rock-jz-photography.jpg','Lone Tree on Coastal Rock')">
+        <img src="images/lone-tree-on-coastal-rock-jz-photography.jpg" alt="Lone Tree on Coastal Rock" loading="lazy">
+        <figcaption>Lone Tree on Coastal Rock</figcaption>
+      </figure>
+      <figure class="card" data-cat="coastal" onclick="openLightbox('images/lighthouse-silhouette-at-dusk-jz-photography.jpg','Lighthouse Silhouette at Dusk')">
+        <img src="images/lighthouse-silhouette-at-dusk-jz-photography.jpg" alt="Lighthouse Silhouette at Dusk" loading="lazy">
+        <figcaption>Lighthouse Silhouette at Dusk</figcaption>
+      </figure>
+      <figure class="card" data-cat="coastal" onclick="openLightbox('images/sunset-over-sea-stacks-jz-photography.jpg','Sunset Over Sea Stacks')">
+        <img src="images/sunset-over-sea-stacks-jz-photography.jpg" alt="Sunset Over Sea Stacks" loading="lazy">
+        <figcaption>Sunset Over Sea Stacks</figcaption>
+      </figure>
+      <figure class="card" data-cat="coastal" onclick="openLightbox('images/golden-hour-at-rocky-beach-jz-photography.jpg','Golden Hour at Rocky Beach')">
+        <img src="images/golden-hour-at-rocky-beach-jz-photography.jpg" alt="Golden Hour at Rocky Beach" loading="lazy">
+        <figcaption>Golden Hour at Rocky Beach</figcaption>
+      </figure>
+      <figure class="card" data-cat="coastal" onclick="openLightbox('images/dramatic-coastal-sunset-jz-photography.jpg','Dramatic Coastal Sunset')">
+        <img src="images/dramatic-coastal-sunset-jz-photography.jpg" alt="Dramatic Coastal Sunset" loading="lazy">
+        <figcaption>Dramatic Coastal Sunset</figcaption>
+      </figure>
+      <figure class="card" data-cat="coastal" onclick="openLightbox('images/rocky-coastal-serenity-jz-photography.jpg','Rocky Coastal Serenity')">
+        <img src="images/rocky-coastal-serenity-jz-photography.jpg" alt="Rocky Coastal Serenity" loading="lazy">
+        <figcaption>Rocky Coastal Serenity</figcaption>
+      </figure>
+      <figure class="card" data-cat="coastal" onclick="openLightbox('images/majestic-stonehenge-replica-under-cloudy-sky-jz-photography.jpg','Majestic Stonehenge Replica Under Cloudy Sky')">
+        <img src="images/majestic-stonehenge-replica-under-cloudy-sky-jz-photography.jpg" alt="Majestic Stonehenge Replica Under Cloudy Sky" loading="lazy">
+        <figcaption>Majestic Stonehenge Replica Under Cloudy Sky</figcaption>
+      </figure>
+      <figure class="card" data-cat="coastal" onclick="openLightbox('images/waves-crashing-on-a-sandy-shore-jz-photography.jpg','Waves Crashing on a Sandy Shore')">
+        <img src="images/waves-crashing-on-a-sandy-shore-jz-photography.jpg" alt="Waves Crashing on a Sandy Shore" loading="lazy">
+        <figcaption>Waves Crashing on a Sandy Shore</figcaption>
+      </figure>
+      <figure class="card" data-cat="coastal" onclick="openLightbox('images/octopus-underwater-jz-photography.jpg','Octopus Underwater')">
+        <img src="images/octopus-underwater-jz-photography.jpg" alt="Octopus Underwater" loading="lazy">
+        <figcaption>Octopus Underwater</figcaption>
+      </figure>
+      <figure class="card" data-cat="coastal" onclick="openLightbox('images/peter-iredale-shipwreck-jz-photography.jpg','Peter Iredale Shipwreck')">
+        <img src="images/peter-iredale-shipwreck-jz-photography.jpg" alt="Peter Iredale Shipwreck" loading="lazy">
+        <figcaption>Peter Iredale Shipwreck</figcaption>
+      </figure>
+      <figure class="card" data-cat="details" onclick="openLightbox('images/vibrant-purple-daisy-with-yellow-center-jz-photography.jpg','Vibrant Purple Daisy with Yellow Center')">
+        <img src="images/vibrant-purple-daisy-with-yellow-center-jz-photography.jpg" alt="Vibrant Purple Daisy with Yellow Center" loading="lazy">
+        <figcaption>Vibrant Purple Daisy with Yellow Center</figcaption>
+      </figure>
+      <figure class="card" data-cat="details" onclick="openLightbox('images/colorful-jumping-spider-on-leaf-jz-photography.jpg','Colorful Jumping Spider on Leaf')">
+        <img src="images/colorful-jumping-spider-on-leaf-jz-photography.jpg" alt="Colorful Jumping Spider on Leaf" loading="lazy">
+        <figcaption>Colorful Jumping Spider on Leaf</figcaption>
+      </figure>
+      <figure class="card" data-cat="details" onclick="openLightbox('images/vibrant-red-roses-amidst-foliage-jz-photography.jpg','Vibrant Red Roses Amidst Foliage')">
+        <img src="images/vibrant-red-roses-amidst-foliage-jz-photography.jpg" alt="Vibrant Red Roses Amidst Foliage" loading="lazy">
+        <figcaption>Vibrant Red Roses Amidst Foliage</figcaption>
+      </figure>
+      <figure class="card" data-cat="details" onclick="openLightbox('images/dew-kissed-pink-berries-jz-photography.jpg','Dew-Kissed Pink Berries')">
+        <img src="images/dew-kissed-pink-berries-jz-photography.jpg" alt="Dew-Kissed Pink Berries" loading="lazy">
+        <figcaption>Dew-Kissed Pink Berries</figcaption>
+      </figure>
+      <figure class="card" data-cat="details" onclick="openLightbox('images/vibrant-ferns-amidst-stone-jz-photography.jpg','Vibrant Ferns Amidst Stone')">
+        <img src="images/vibrant-ferns-amidst-stone-jz-photography.jpg" alt="Vibrant Ferns Amidst Stone" loading="lazy">
+        <figcaption>Vibrant Ferns Amidst Stone</figcaption>
+      </figure>
+      <figure class="card" data-cat="details" onclick="openLightbox('images/majestic-steel-bridge-over-water-jz-photography.jpg','Majestic Steel Bridge Over Water')">
+        <img src="images/majestic-steel-bridge-over-water-jz-photography.jpg" alt="Majestic Steel Bridge Over Water" loading="lazy">
+        <figcaption>Majestic Steel Bridge Over Water</figcaption>
+      </figure>
+      <figure class="card" data-cat="details" onclick="openLightbox('images/scenic-river-with-steel-bridge-jz-photography.jpg','Scenic River with Steel Bridge')">
+        <img src="images/scenic-river-with-steel-bridge-jz-photography.jpg" alt="Scenic River with Steel Bridge" loading="lazy">
+        <figcaption>Scenic River with Steel Bridge</figcaption>
+      </figure>
+      <figure class="card" data-cat="details" onclick="openLightbox('images/vintage-ford-truck-in-showroom-jz-photography.jpg','Vintage Ford Truck in Showroom')">
+        <img src="images/vintage-ford-truck-in-showroom-jz-photography.jpg" alt="Vintage Ford Truck in Showroom" loading="lazy">
+        <figcaption>Vintage Ford Truck in Showroom</figcaption>
+      </figure>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wordmark">JZ Photography</div>
+  <div>&copy; Jeremy Zimmer. All images protected under copyright.</div>
+</footer>
+
+<div id="lightbox" onclick="closeLightbox(event)">
+  <button class="close" onclick="closeLightbox(event)">&times;</button>
+  <img id="lightbox-img" src="" alt="">
+  <div class="caption" id="lightbox-caption"></div>
+</div>
+
+<script>
+document.querySelectorAll('.filter-btn').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    var f = btn.dataset.filter;
+    document.querySelectorAll('.card').forEach(function(card) {
+      card.classList.toggle('hidden', f !== 'all' && card.dataset.cat !== f);
+    });
+  });
+});
+function openLightbox(src, caption) {
+  document.getElementById('lightbox-img').src = src;
+  document.getElementById('lightbox-caption').textContent = caption;
+  document.getElementById('lightbox').classList.add('open');
+}
+function closeLightbox(e) {
+  if (e.target.id === 'lightbox' || e.target.classList.contains('close')) {
+    document.getElementById('lightbox').classList.remove('open');
+  }
+}
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') document.getElementById('lightbox').classList.remove('open');
+});
+</script>
+
+</body>
+</html>
