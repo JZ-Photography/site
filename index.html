@@ -189,7 +189,11 @@ footer.site-footer a:hover { color: var(--ink); }
   .promo, .promo.reverse { grid-template-columns: 1fr; direction: ltr; }
   .promo .img { min-height: 260px; }
   .promo .copy { padding: 48px 8vw; }
+    .hero { height: 75vh; min-height: 460px; }
 }
+  @media (max-width: 480px) {
+      .hero { height: 60vh; min-height: 380px; }
+  }
 </style>
 </head>
 <body>
